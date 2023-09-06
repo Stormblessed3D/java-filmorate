@@ -210,7 +210,7 @@ class FilmControllerTest {
         mockMvc.perform(put("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isBadRequest());
     }
 
     @Test

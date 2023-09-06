@@ -1,15 +1,12 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Data;
-import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.UserDoesNotExistException;
-import ru.yandex.practicum.filmorate.exception.ValidationException;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 
-import java.time.LocalDate;
+import javax.validation.Valid;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,16 +26,8 @@ public class UserController {
     }
 
     @PostMapping
-    public User createUser(@RequestBody @NonNull User user) {
-        if (user.getName() == null) {
-            user.setName(user.getLogin());
-        }
-        try {
-            validate(user);
-        } catch (ValidationException e) {
-            log.warn(e.getMessage(), e);
-            throw e;
-        }
+    public User createUser(@Valid @RequestBody User user) {
+        setNameEqualToLoginIfNull(user);
         int userId = generateUserId();
         user.setId(userId);
         users.put(userId, user);
@@ -47,23 +36,12 @@ public class UserController {
     }
 
     @PutMapping
-    public User updateUser(@RequestBody @NonNull User user) {
-        try {
-            if (!users.containsKey(user.getId())) {
-                throw new UserDoesNotExistException("Пользователь с идентификатором " +
-                        user.getId() + " не зарегистрирован.");
-            }
-        } catch (UserDoesNotExistException e) {
-            log.warn(e.getMessage(), e);
-            throw e;
+    public User updateUser(@Valid @RequestBody User user) {
+        if (!users.containsKey(user.getId())) {
+            log.warn("Пользователь с идентификатором {} не зарегистрирован", user.getId());
+            throw new EntityNotFoundException("Объект " + user.getClass().getName() + " не зарегистрирован");
         }
-        try {
-            validate(user);
-        } catch (ValidationException e) {
-            log.warn(e.getMessage(),e);
-            throw e;
-        }
-
+        setNameEqualToLoginIfNull(user);
         if (users.containsKey(user.getId())) {
             users.put(user.getId(), user);
             log.info("Пользователь c id {} обновлен", user.getId());
@@ -73,17 +51,13 @@ public class UserController {
         return user;
     }
 
-    private void validate(User user) {
-        boolean isEmailIncorrect = user.getEmail().isBlank() || !user.getEmail().contains("@");
-        boolean isLoginIncorrect = user.getLogin().isBlank() || StringUtils.containsWhitespace(user.getLogin());
-        boolean isBirthDateInFuture = user.getBirthday().isAfter(LocalDate.now());
-        if (isEmailIncorrect || isLoginIncorrect || isBirthDateInFuture) {
-            throw new ValidationException("Пользователь не соответствует необходимым критериям по email, " +
-                    "логину или дате рождения");
-        }
-    }
-
     private int generateUserId() {
         return ++userId;
+    }
+
+    private void setNameEqualToLoginIfNull(User user) {
+        if (user.getName() == null || user.getName().isBlank()) {
+            user.setName(user.getLogin());
+        }
     }
 }
