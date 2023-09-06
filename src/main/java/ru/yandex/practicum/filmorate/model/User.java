@@ -14,7 +14,7 @@ public class User {
     @NotBlank
     private String email;
     @NotBlank
-    @Pattern(regexp="\\S*", message = "login should not contain whitespaces")
+    @Pattern(regexp = "\\S*", message = "login should not contain whitespaces")
     private String login;
     private String name;
     @NotNull
