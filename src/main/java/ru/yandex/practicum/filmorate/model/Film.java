@@ -11,6 +11,7 @@ public class Film {
     private int id;
     @NotBlank
     private String name;
+    @NotNull
     @Size(max = 200, message = "{validation.description.size.too_long}")
     private String description;
     @NotNull

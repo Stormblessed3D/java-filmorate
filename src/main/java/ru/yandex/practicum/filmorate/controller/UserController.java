@@ -32,7 +32,7 @@ public class UserController {
         user.setId(userId);
         users.put(userId, user);
         log.info("Пользователь {} добавлен", user.getId());
-        return users.get(userId);
+        return user;
     }
 
     @PutMapping
@@ -42,12 +42,8 @@ public class UserController {
             throw new EntityNotFoundException("Объект " + user.getClass().getName() + " не зарегистрирован");
         }
         setNameEqualToLoginIfNull(user);
-        if (users.containsKey(user.getId())) {
-            users.put(user.getId(), user);
-            log.info("Пользователь c id {} обновлен", user.getId());
-        } else {
-            createUser(user);
-        }
+        users.put(user.getId(), user);
+        log.info("Пользователь c id {} обновлен", user.getId());
         return user;
     }
 

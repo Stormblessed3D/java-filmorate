@@ -31,7 +31,7 @@ public class FilmController {
         film.setId(filmId);
         films.put(filmId, film);
         log.info("Фильм {} добавлен", film.getName());
-        return films.get(filmId);
+        return film;
     }
 
     @PutMapping
