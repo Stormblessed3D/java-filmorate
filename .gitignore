@@ -14,6 +14,8 @@ target/
 !**/src/main/**/target/
 !**/src/test/**/target/
 
+HELP.md
+
 ### STS ###
 .apt_generated
 .classpath
@@ -44,3 +46,9 @@ build/
 
 *.db
 db/*
+/mvnw
+/mvnw.cmd
+maven-wrapper.properties
+
+# Includelist some files
+!pom.xml
