@@ -26,7 +26,7 @@ public class FilmController {
 
     @GetMapping("/{filmId}")
     public Film getFilmById(@PathVariable Integer filmId) {
-        if(filmId == 0 || filmId < 0) {
+        if (filmId == 0 || filmId < 0) {
             throw new IncorrectVariableException("id фильма не может быть меньше или равно нулю.");
         }
         return filmService.getFilmById(filmId);
@@ -39,7 +39,7 @@ public class FilmController {
 
     @GetMapping("/popular")
     public List<Film> getMostPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
-        if(count == 0 || count < 0) {
+        if (count == 0 || count < 0) {
             throw new IncorrectParameterException("количество выводимых фильмов не может быть меньше или равно нулю");
         }
         return filmService.getMostPopularFilms(count);
@@ -58,10 +58,10 @@ public class FilmController {
     @PutMapping("/{filmId}/like/{userId}")
     public Film addLike(@PathVariable Integer filmId,
                         @PathVariable Integer userId) {
-        if(filmId == 0 || filmId < 0) {
+        if (filmId == 0 || filmId < 0) {
             throw new IncorrectVariableException("id фильма не может быть меньше или равно нулю.");
         }
-        if(userId == 0 || userId < 0) {
+        if (userId == 0 || userId < 0) {
             throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
         return filmService.addLike(filmId, userId);
@@ -70,10 +70,10 @@ public class FilmController {
     @DeleteMapping("/{filmId}/like/{userId}")
     public Film deleteLike(@PathVariable Integer filmId,
                         @PathVariable Integer userId) {
-        if(filmId == 0 || filmId < 0) {
+        if (filmId == 0 || filmId < 0) {
             throw new IncorrectVariableException("id фильма не может быть меньше или равно нулю.");
         }
-        if(userId == 0 || userId < 0) {
+        if (userId == 0 || userId < 0) {
             throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
         return filmService.deleteLike(filmId, userId);
