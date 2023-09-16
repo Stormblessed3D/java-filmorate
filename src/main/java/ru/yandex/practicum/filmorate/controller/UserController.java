@@ -30,7 +30,7 @@ public class UserController {
 
     @GetMapping("/{userId}")
     public User getFilmById(@PathVariable Integer userId) {
-        if(userId == 0 || userId < 0) {
+        if (userId == 0 || userId < 0) {
             throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
         return userService.getUserById(userId);
@@ -38,7 +38,7 @@ public class UserController {
 
     @GetMapping("/{userId}/friends")
     public List<User> getFriends(@PathVariable Integer userId) {
-        if(userId == 0 || userId < 0) {
+        if (userId == 0 || userId < 0) {
             throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
         return userService.getUserFriends(userId);
@@ -47,7 +47,7 @@ public class UserController {
     @GetMapping("/{userId}/friends/common/{otherId}")
     public List<User> getCommonFriends(@PathVariable Integer userId,
                                           @PathVariable Integer otherId) {
-        if(userId == 0 || otherId == 0 || userId < 0 || otherId < 0) {
+        if (userId == 0 || otherId == 0 || userId < 0 || otherId < 0) {
             throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
         return userService.getCommonFriends(userId, otherId);
@@ -66,7 +66,7 @@ public class UserController {
     @PutMapping("/{userId}/friends/{friendId}")
     public User addUserToFriends(@PathVariable Integer userId,
                                  @PathVariable Integer friendId) {
-        if(userId == 0 || friendId == 0 || userId < 0 || friendId < 0) {
+        if (userId == 0 || friendId == 0 || userId < 0 || friendId < 0) {
             throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
         return userService.addFriend(userId,friendId);
@@ -75,7 +75,7 @@ public class UserController {
     @DeleteMapping("/{userId}/friends/{friendId}")
     public User deleteFriend(@PathVariable Integer userId,
                              @PathVariable Integer friendId) {
-        if(userId == 0 || friendId == 0 || userId < 0 || friendId < 0) {
+        if (userId == 0 || friendId == 0 || userId < 0 || friendId < 0) {
             throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
         return userService.deleteFriend(userId, friendId);
