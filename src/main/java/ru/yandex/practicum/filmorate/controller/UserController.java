@@ -2,58 +2,82 @@ package ru.yandex.practicum.filmorate.controller;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
+import ru.yandex.practicum.filmorate.exception.IncorrectVariableException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/users")
 @Slf4j
 @Data
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
-    private int userId = 0;
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
     public List<User> getAllUsers() {
-        return new ArrayList<>(users.values());
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{userId}")
+    public User getFilmById(@PathVariable Integer userId) {
+        if(userId == 0 || userId < 0) {
+            throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
+        }
+        return userService.getUserById(userId);
+    }
+
+    @GetMapping("/{userId}/friends")
+    public List<User> getFriends(@PathVariable Integer userId) {
+        if(userId == 0 || userId < 0) {
+            throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
+        }
+        return userService.getUserFriends(userId);
+    }
+
+    @GetMapping("/{userId}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable Integer userId,
+                                          @PathVariable Integer otherId) {
+        if(userId == 0 || otherId == 0 || userId < 0 || otherId < 0) {
+            throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
+        }
+        return userService.getCommonFriends(userId, otherId);
     }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        setNameEqualToLoginIfNull(user);
-        int userId = generateUserId();
-        user.setId(userId);
-        users.put(userId, user);
-        log.info("Пользователь {} добавлен", user.getId());
-        return user;
+        return userService.createUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User user) {
-        if (!users.containsKey(user.getId())) {
-            log.warn("Пользователь с идентификатором {} не зарегистрирован", user.getId());
-            throw new EntityNotFoundException("Объект " + user.getClass().getName() + " не зарегистрирован");
-        }
-        setNameEqualToLoginIfNull(user);
-        users.put(user.getId(), user);
-        log.info("Пользователь c id {} обновлен", user.getId());
-        return user;
+        return userService.updateUser(user);
     }
 
-    private int generateUserId() {
-        return ++userId;
+    @PutMapping("/{userId}/friends/{friendId}")
+    public User addUserToFriends(@PathVariable Integer userId,
+                                 @PathVariable Integer friendId) {
+        if(userId == 0 || friendId == 0 || userId < 0 || friendId < 0) {
+            throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
+        }
+        return userService.addFriend(userId,friendId);
     }
 
-    private void setNameEqualToLoginIfNull(User user) {
-        if (user.getName() == null || user.getName().isBlank()) {
-            user.setName(user.getLogin());
+    @DeleteMapping("/{userId}/friends/{friendId}")
+    public User deleteFriend(@PathVariable Integer userId,
+                             @PathVariable Integer friendId) {
+        if(userId == 0 || friendId == 0 || userId < 0 || friendId < 0) {
+            throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
         }
+        return userService.deleteFriend(userId, friendId);
     }
 }
