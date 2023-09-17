@@ -32,11 +32,9 @@ public class User {
     }
 
     public User(String email, String login, LocalDate birthday) {
-        id = 0;
         this.email = email;
         this.login = login;
         this.name = login;
         this.birthday = birthday;
-        friends = new HashSet<>();
     }
 }

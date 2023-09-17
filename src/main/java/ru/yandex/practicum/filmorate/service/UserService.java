@@ -1,7 +1,9 @@
 package ru.yandex.practicum.filmorate.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
@@ -11,6 +13,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Slf4j
 public class UserService {
     private final UserStorage inMemoryUserStorage;
 
@@ -24,7 +27,8 @@ public class UserService {
     }
 
     public User getUserById(Integer id) {
-        return inMemoryUserStorage.getUserById(id);
+        return inMemoryUserStorage.getUserById(id)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", id)));
     }
 
     public List<User> getUserFriends(Integer userId) {
@@ -36,37 +40,44 @@ public class UserService {
 
     public User createUser(User user) {
         setNameEqualToLoginIfNull(user);
+        log.info("Пользователь {} добавлен", user.getId());
         return inMemoryUserStorage.addUser(user);
     }
 
     public User updateUser(User user) {
+        inMemoryUserStorage.getUserById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", user.getId())));
         setNameEqualToLoginIfNull(user);
+        log.info("Пользователь c id {} обновлен", user.getId());
         return inMemoryUserStorage.updateUser(user);
     }
 
-    public User deleteUser(User user) {
-        return inMemoryUserStorage.deleteUser(user);
+    public void deleteUser(User user) {
+        inMemoryUserStorage.getUserById(user.getId())
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", user.getId())));
+        log.info("Пользователь c id {} был удален", user.getId());
+        inMemoryUserStorage.deleteUser(user);
     }
 
     public User addFriend(Integer userId, Integer idOfFriendToBeAdded) {
-        User user = inMemoryUserStorage.getUserById(userId);
+        User user = getUserById(userId);
         user.getFriends().add(idOfFriendToBeAdded);
-        User friendToBeAdded = inMemoryUserStorage.getUserById(idOfFriendToBeAdded);
+        User friendToBeAdded = getUserById(idOfFriendToBeAdded);
         friendToBeAdded.getFriends().add(userId);
         return friendToBeAdded;
     }
 
     public User deleteFriend(Integer userId, Integer idOfFriendToBeDeleted) {
-        User user = inMemoryUserStorage.getUserById(userId);
+        User user = getUserById(userId);
         user.getFriends().remove(idOfFriendToBeDeleted);
-        User friendToBeDeleted = inMemoryUserStorage.getUserById(idOfFriendToBeDeleted);
+        User friendToBeDeleted = getUserById(idOfFriendToBeDeleted);
         friendToBeDeleted.getFriends().remove(userId);
         return friendToBeDeleted;
     }
 
     public List<User> getCommonFriends(Integer userId, Integer idOtherUser) {
-        User user = inMemoryUserStorage.getUserById(userId);
-        User otherUser = inMemoryUserStorage.getUserById(idOtherUser);
+        User user = getUserById(userId);
+        User otherUser = getUserById(idOtherUser);
         Set<Integer> intersection = new HashSet<>(user.getFriends());
         intersection.retainAll(otherUser.getFriends());
         return intersection.stream()

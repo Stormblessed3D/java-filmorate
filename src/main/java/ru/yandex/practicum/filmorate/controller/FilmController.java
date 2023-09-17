@@ -3,18 +3,20 @@ package ru.yandex.practicum.filmorate.controller;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.exception.IncorrectParameterException;
-import ru.yandex.practicum.filmorate.exception.IncorrectVariableException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Positive;
 import java.util.List;
 
 @RestController
 @RequestMapping("/films")
 @Slf4j
+@Validated
 @Data
 public class FilmController {
     private final FilmService filmService;
@@ -25,10 +27,7 @@ public class FilmController {
     }
 
     @GetMapping("/{filmId}")
-    public Film getFilmById(@PathVariable Integer filmId) {
-        if (filmId == 0 || filmId < 0) {
-            throw new IncorrectVariableException("id фильма не может быть меньше или равно нулю.");
-        }
+    public Film getFilmById(@PathVariable @NotNull @Positive Integer filmId) {
         return filmService.getFilmById(filmId);
     }
 
@@ -38,10 +37,8 @@ public class FilmController {
     }
 
     @GetMapping("/popular")
-    public List<Film> getMostPopularFilms(@RequestParam(defaultValue = "10", required = false) Integer count) {
-        if (count == 0 || count < 0) {
-            throw new IncorrectParameterException("количество выводимых фильмов не может быть меньше или равно нулю");
-        }
+    public List<Film> getMostPopularFilms(@RequestParam(defaultValue = "10", required = false)
+                                              @NotNull @Positive Integer count) {
         return filmService.getMostPopularFilms(count);
     }
 
@@ -56,26 +53,14 @@ public class FilmController {
     }
 
     @PutMapping("/{filmId}/like/{userId}")
-    public Film addLike(@PathVariable Integer filmId,
-                        @PathVariable Integer userId) {
-        if (filmId == 0 || filmId < 0) {
-            throw new IncorrectVariableException("id фильма не может быть меньше или равно нулю.");
-        }
-        if (userId == 0 || userId < 0) {
-            throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
-        }
+    public Film addLike(@PathVariable  @NotNull @Positive Integer filmId,
+                        @PathVariable  @NotNull @Positive Integer userId) {
         return filmService.addLike(filmId, userId);
     }
 
     @DeleteMapping("/{filmId}/like/{userId}")
-    public Film deleteLike(@PathVariable Integer filmId,
-                        @PathVariable Integer userId) {
-        if (filmId == 0 || filmId < 0) {
-            throw new IncorrectVariableException("id фильма не может быть меньше или равно нулю.");
-        }
-        if (userId == 0 || userId < 0) {
-            throw new IncorrectVariableException("id пользователя не может быть меньше или равно нулю.");
-        }
+    public Film deleteLike(@PathVariable @NotNull @Positive Integer filmId,
+                        @PathVariable @NotNull @Positive Integer userId) {
         return filmService.deleteLike(filmId, userId);
     }
 }

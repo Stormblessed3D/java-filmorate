@@ -8,11 +8,11 @@ import java.time.LocalDate;
 
 public class ReleaseDateConstraintValidator implements ConstraintValidator<ReleaseDate, LocalDate> {
 
-    private LocalDate annotationReleaseDate;
+/*    private LocalDate annotationReleaseDate;
 
     @Override
     public void initialize(ReleaseDate releaseDate) {
-    }
+    }*/
 
     @Override
     public boolean isValid(LocalDate releaseDateField, ConstraintValidatorContext cxt) {

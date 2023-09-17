@@ -12,7 +12,7 @@ import javax.validation.ValidationException;
 public class ErrorHandler {
 
     @ExceptionHandler
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handle(ValidationException e) {
         return new ErrorResponse("Ошибка валидации", e.getMessage());
     }
@@ -27,11 +27,5 @@ public class ErrorHandler {
     @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
     public ErrorResponse handle(Throwable e) {
         return new ErrorResponse("Внутренняя ошибка сервера", e.getMessage());
-    }
-
-    @ExceptionHandler
-    @ResponseStatus(HttpStatus.NOT_FOUND)
-    public ErrorResponse handle(IncorrectVariableException e) {
-        return new ErrorResponse("Ошибка в указанном при запросе параметре", e.getMessage());
     }
 }

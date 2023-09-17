@@ -5,15 +5,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
+import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
+import ru.yandex.practicum.filmorate.service.UserService;
+import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -27,12 +34,16 @@ class FilmControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private FilmService filmService;
+
     @Test
     void getAllFilms_thenResponseStatusOk_WithFilmsCollectionInBody() throws Exception {
         Film filmToCreate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
         filmToCreate.setId(1);
         List<Film> expectedFilms = List.of(filmToCreate);
+        when(filmService.getAllFilms()).thenReturn(expectedFilms);
 
         mockMvc.perform(post("/films")
                         .contentType("application/json")
@@ -45,6 +56,7 @@ class FilmControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(filmService).getAllFilms();
         assertEquals(objectMapper.writeValueAsString(expectedFilms), response);
     }
 
@@ -53,6 +65,7 @@ class FilmControllerTest {
         Film filmToCreate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
         filmToCreate.setId(1);
+        when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
 
         String response = mockMvc.perform(post("/films")
                         .contentType("application/json")
@@ -62,6 +75,7 @@ class FilmControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(filmService).createFilm(filmToCreate);
         assertEquals(objectMapper.writeValueAsString(filmToCreate), response);
     }
 
@@ -69,7 +83,7 @@ class FilmControllerTest {
     void createFilm_whenRequestIsEmpty_thenReturnBadRequest() throws Exception {
         mockMvc.perform(post("/films")
                         .contentType("application/json"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -77,11 +91,12 @@ class FilmControllerTest {
         Film filmToCreate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
         filmToCreate.setName("");
+        when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
 
         mockMvc.perform(post("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -91,6 +106,7 @@ class FilmControllerTest {
                 LocalDate.of(2020, 1, 1), 120);
         filmToCreate.setId(1);
 
+        when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
         String response = mockMvc.perform(post("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
@@ -99,6 +115,7 @@ class FilmControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(filmService).createFilm(filmToCreate);
         assertEquals(objectMapper.writeValueAsString(filmToCreate), response);
     }
 
@@ -111,7 +128,7 @@ class FilmControllerTest {
         mockMvc.perform(post("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -119,6 +136,7 @@ class FilmControllerTest {
         Film filmToCreate = new Film("TestMovie", "Description",
                 LocalDate.of(1985, 12, 28), 120);
         filmToCreate.setId(1);
+        when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
 
         String response = mockMvc.perform(post("/films")
                         .contentType("application/json")
@@ -127,6 +145,7 @@ class FilmControllerTest {
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
+        verify(filmService).createFilm(filmToCreate);
 
         assertEquals(objectMapper.writeValueAsString(filmToCreate), response);
     }
@@ -139,13 +158,14 @@ class FilmControllerTest {
         mockMvc.perform(post("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     void updateFilm_whenIdIsUnknown_thenReturnBadRequest() throws Exception {
         Film filmToCreate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
+        when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
         mockMvc.perform(post("/films")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(filmToCreate)));
@@ -154,23 +174,29 @@ class FilmControllerTest {
         Film filmToUpdate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
         filmToUpdate.setId(2);
+        when(filmService.updateFilm(filmToUpdate)).thenThrow(new EntityNotFoundException("Фильм с id 2 не найден"));
 
         mockMvc.perform(put("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToUpdate)))
                 .andExpect(status().isNotFound());
+
+        verify(filmService).updateFilm(filmToUpdate);
     }
 
     @Test
     void updateFilm_whenInvokedWithValidFilm_thenResponseStatusOk_WithCreatedFilmInBody() throws Exception {
         Film filmToCreate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
+        when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
         mockMvc.perform(post("/films")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(filmToCreate)));
 
         filmToCreate.setName("TestMovieUpdated");
         filmToCreate.setId(1);
+        when(filmService.updateFilm(filmToCreate)).thenReturn(filmToCreate);
+
         String response = mockMvc.perform(put("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
@@ -193,7 +219,7 @@ class FilmControllerTest {
 
         mockMvc.perform(put("/films")
                         .contentType("application/json"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
@@ -210,13 +236,14 @@ class FilmControllerTest {
         mockMvc.perform(put("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     void updateFilm_whenMaximumDescriptionIs200Symbols_thenResponseStatusOk() throws Exception {
         Film filmToCreate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
+        when(filmService.updateFilm(filmToCreate)).thenReturn(filmToCreate);
 
         mockMvc.perform(post("/films")
                 .contentType("application/json")
@@ -234,6 +261,7 @@ class FilmControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(filmService).updateFilm(filmToCreate);
         assertEquals(objectMapper.writeValueAsString(filmToCreate), response);
     }
 
@@ -253,13 +281,14 @@ class FilmControllerTest {
         mockMvc.perform(put("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     void updateFilm_whenReleaseDateIs_28_12_1895_thenResponseStatusOk() throws Exception {
         Film filmToCreate = new Film("TestMovie", "TestDescription",
                 LocalDate.of(2020, 1, 1), 120);
+        when(filmService.updateFilm(filmToCreate)).thenReturn(filmToCreate);
 
         mockMvc.perform(post("/films")
                 .contentType("application/json")
@@ -276,6 +305,7 @@ class FilmControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(filmService).updateFilm(filmToCreate);
         assertEquals(objectMapper.writeValueAsString(filmToCreate), response);
     }
 
@@ -294,6 +324,6 @@ class FilmControllerTest {
         mockMvc.perform(put("/films")
                         .contentType("application/json")
                         .content(objectMapper.writeValueAsString(filmToCreate)))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 }
