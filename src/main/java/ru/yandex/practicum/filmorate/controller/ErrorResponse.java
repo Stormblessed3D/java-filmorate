@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.controller;
 
 public class ErrorResponse {
-    String error;
-    String message;
+    private String error;
+    private String message;
 
     public ErrorResponse(String error, String message) {
         this.error = error;

@@ -15,19 +15,19 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class UserService {
-    private final UserStorage inMemoryUserStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public UserService(UserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserService(UserStorage userStorage) {
+        this.userStorage = userStorage;
     }
 
     public List<User> getAllUsers() {
-        return inMemoryUserStorage.getAllUsers();
+        return userStorage.getAllUsers();
     }
 
     public User getUserById(Integer id) {
-        return inMemoryUserStorage.getUserById(id)
+        return userStorage.getUserById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", id)));
     }
 
@@ -41,36 +41,35 @@ public class UserService {
     public User createUser(User user) {
         setNameEqualToLoginIfNull(user);
         log.info("Пользователь {} добавлен", user.getId());
-        return inMemoryUserStorage.addUser(user);
+        return userStorage.addUser(user);
     }
 
     public User updateUser(User user) {
-        inMemoryUserStorage.getUserById(user.getId())
+        userStorage.getUserById(user.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", user.getId())));
         setNameEqualToLoginIfNull(user);
         log.info("Пользователь c id {} обновлен", user.getId());
-        return inMemoryUserStorage.updateUser(user);
+        return userStorage.updateUser(user);
     }
 
     public void deleteUser(User user) {
-        inMemoryUserStorage.getUserById(user.getId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", user.getId())));
+        getUserById(user.getId());
         log.info("Пользователь c id {} был удален", user.getId());
-        inMemoryUserStorage.deleteUser(user);
+        userStorage.deleteUser(user);
     }
 
     public User addFriend(Integer userId, Integer idOfFriendToBeAdded) {
         User user = getUserById(userId);
-        user.getFriends().add(idOfFriendToBeAdded);
         User friendToBeAdded = getUserById(idOfFriendToBeAdded);
+        user.getFriends().add(idOfFriendToBeAdded);
         friendToBeAdded.getFriends().add(userId);
         return friendToBeAdded;
     }
 
     public User deleteFriend(Integer userId, Integer idOfFriendToBeDeleted) {
         User user = getUserById(userId);
-        user.getFriends().remove(idOfFriendToBeDeleted);
         User friendToBeDeleted = getUserById(idOfFriendToBeDeleted);
+        user.getFriends().remove(idOfFriendToBeDeleted);
         friendToBeDeleted.getFriends().remove(userId);
         return friendToBeDeleted;
     }

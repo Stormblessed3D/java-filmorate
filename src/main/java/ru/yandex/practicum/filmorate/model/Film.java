@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDate;
 
@@ -21,6 +22,7 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
+    @JsonIgnore
     private Set<Integer> likes;
     public static final int MAXIMUM_DESCRIPTION_LENGTH = 200;
     public static final LocalDate INITIAL_DATE = LocalDate.of(1895, 12, 28);
@@ -35,9 +37,6 @@ public class Film {
     }
 
     public Integer getNumberOfLikes() {
-        if (likes.isEmpty()) {
-            return 0;
-        }
         return getLikes().size();
     }
 }

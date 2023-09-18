@@ -1,5 +1,6 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -11,6 +12,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 public class User {
+    private int id = 0;
     @Email
     @NotBlank
     private String email;
@@ -21,8 +23,8 @@ public class User {
     @NotNull
     @PastOrPresent
     private LocalDate birthday;
-    private int id = 0;
-    private Set<Integer> friends  = new HashSet<>();
+    @JsonIgnore
+    private Set<Integer> friends = new HashSet<>();
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;

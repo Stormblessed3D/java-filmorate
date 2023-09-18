@@ -14,39 +14,39 @@ import java.util.stream.Collectors;
 @Service
 @Slf4j
 public class FilmService {
-    private final FilmStorage inMemoryFilmStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
-    public FilmService(FilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmService(FilmStorage filmStorage) {
+        this.filmStorage = filmStorage;
     }
 
     public List<Film> getAllFilms() {
-        return inMemoryFilmStorage.getAllFilms();
+        return filmStorage.getAllFilms();
     }
 
     public Film getFilmById(Integer id) {
-        return inMemoryFilmStorage.getFilmById(id)
+        return filmStorage.getFilmById(id)
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Фильм с id %d не найден", id)));
     }
 
     public Film createFilm(Film film) {
         log.info("Фильм был добавлен");
-        return inMemoryFilmStorage.addFilm(film);
+        return filmStorage.addFilm(film);
     }
 
     public Film updateFilm(Film film) {
-        inMemoryFilmStorage.getFilmById(film.getId())
+        filmStorage.getFilmById(film.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Фильм с id %d не найден", film.getId())));
         log.info("Фильм c id {} был обновлен", film.getId());
-        return inMemoryFilmStorage.updateFilm(film);
+        return filmStorage.updateFilm(film);
     }
 
     public void deleteFilm(Film film) {
-        inMemoryFilmStorage.getFilmById(film.getId())
+        filmStorage.getFilmById(film.getId())
                 .orElseThrow(() -> new EntityNotFoundException(String.format("Фильм с id %d не найден", film.getId())));
         log.info("Фильм c id {} был удален", film.getId());
-        inMemoryFilmStorage.deleteFilm(film);
+        filmStorage.deleteFilm(film);
     }
 
     public Film addLike(Integer filmId, Integer userId) {
