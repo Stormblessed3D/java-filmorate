@@ -1,6 +1,5 @@
 package ru.yandex.practicum.filmorate.controller;
 
-import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
@@ -9,7 +8,6 @@ import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.util.List;
 
@@ -17,7 +15,6 @@ import java.util.List;
 @RequestMapping("/users")
 @Slf4j
 @Validated
-@Data
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
@@ -28,18 +25,18 @@ public class UserController {
     }
 
     @GetMapping("/{userId}")
-    public User getFilmById(@PathVariable @NotNull @Positive Integer userId) {
+    public User getFilmById(@PathVariable @Positive Integer userId) {
         return userService.getUserById(userId);
     }
 
     @GetMapping("/{userId}/friends")
-    public List<User> getFriends(@PathVariable @NotNull @Positive Integer userId) {
+    public List<User> getFriends(@PathVariable @Positive Integer userId) {
         return userService.getUserFriends(userId);
     }
 
     @GetMapping("/{userId}/friends/common/{otherId}")
-    public List<User> getCommonFriends(@PathVariable @NotNull @Positive Integer userId,
-                                          @PathVariable @NotNull @Positive Integer otherId) {
+    public List<User> getCommonFriends(@PathVariable @Positive Integer userId,
+                                          @PathVariable @Positive Integer otherId) {
         return userService.getCommonFriends(userId, otherId);
     }
 
@@ -54,14 +51,14 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
-    public User addUserToFriends(@PathVariable @NotNull @Positive Integer userId,
-                                 @PathVariable @NotNull @Positive Integer friendId) {
+    public User addUserToFriends(@PathVariable @Positive Integer userId,
+                                 @PathVariable @Positive Integer friendId) {
         return userService.addFriend(userId,friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public User deleteFriend(@PathVariable @NotNull @Positive Integer userId,
-                             @PathVariable @NotNull @Positive Integer friendId) {
+    public User deleteFriend(@PathVariable @Positive Integer userId,
+                             @PathVariable @Positive Integer friendId) {
         return userService.deleteFriend(userId, friendId);
     }
 }

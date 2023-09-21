@@ -5,7 +5,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.Comparator;
 import java.util.List;
@@ -15,10 +17,12 @@ import java.util.stream.Collectors;
 @Slf4j
 public class FilmService {
     private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(FilmStorage filmStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
         this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
 
     public List<Film> getAllFilms() {
@@ -36,27 +40,29 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        filmStorage.getFilmById(film.getId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Фильм с id %d не найден", film.getId())));
+        getFilmById(film.getId());
         log.info("Фильм c id {} был обновлен", film.getId());
         return filmStorage.updateFilm(film);
     }
 
     public void deleteFilm(Film film) {
-        filmStorage.getFilmById(film.getId())
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Фильм с id %d не найден", film.getId())));
+        getFilmById(film.getId());
         log.info("Фильм c id {} был удален", film.getId());
         filmStorage.deleteFilm(film);
     }
 
     public Film addLike(Integer filmId, Integer userId) {
         Film film = getFilmById(filmId);
+        User user = userStorage.getUserById(userId)
+                        .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", userId)));
         film.getLikes().add(userId);
         return film;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {
         Film film = getFilmById(filmId);
+        User user = userStorage.getUserById(userId)
+                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", userId)));
         film.getLikes().remove(userId);
         return film;
     }
