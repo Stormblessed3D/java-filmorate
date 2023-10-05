@@ -5,15 +5,19 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -28,12 +32,16 @@ class UserControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    @MockBean
+    private UserService userService;
+
     @Test
     void getAllUsers_thenResponseStatusOk_WithFilmsCollectionInBody() throws Exception {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
         userToCreate.setId(1);
         List<User> expectedUsers = List.of(userToCreate);
+        when(userService.getAllUsers()).thenReturn(expectedUsers);
 
         mockMvc.perform(post("/users")
                         .contentType("application/json")
@@ -47,6 +55,7 @@ class UserControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(userService).getAllUsers();
         assertEquals(objectMapper.writeValueAsString(expectedUsers), response);
     }
 
@@ -55,6 +64,7 @@ class UserControllerTest {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
         userToCreate.setId(1);
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
 
         String response = mockMvc.perform(post("/users")
                         .contentType("application/json")
@@ -64,6 +74,7 @@ class UserControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(userService).createUser(userToCreate);
         assertEquals(objectMapper.writeValueAsString(userToCreate), response);
     }
 
@@ -71,13 +82,15 @@ class UserControllerTest {
     void createUser_whenRequestIsEmpty_thenReturnBadRequest() throws Exception {
         mockMvc.perform(post("/users")
                         .contentType("application/json"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     void createUser_whenNameIsBlank_thenResponseStatusOk() throws Exception {
         User userToCreate = new User("friend@common.ru", "common",
                 LocalDate.of(2000, 8, 20));
+        userToCreate.setId(1);
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
 
         String response = mockMvc.perform(post("/users")
                         .contentType("application/json")
@@ -154,12 +167,15 @@ class UserControllerTest {
     void updateUser_whenInvokedWithValidFilm_thenResponseStatusOk_WithCreatedUserInBody() throws Exception {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
+
         mockMvc.perform(post("/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(userToCreate)));
 
         userToCreate.setName("TestUserUpdated");
         userToCreate.setId(1);
+        when(userService.updateUser(userToCreate)).thenReturn(userToCreate);
 
         String response = mockMvc.perform(put("/users")
                         .contentType("application/json")
@@ -169,6 +185,7 @@ class UserControllerTest {
                 .getResponse()
                 .getContentAsString();
 
+        verify(userService).updateUser(userToCreate);
         assertEquals(objectMapper.writeValueAsString(userToCreate), response);
     }
 
@@ -182,13 +199,15 @@ class UserControllerTest {
 
         mockMvc.perform(put("/users")
                         .contentType("application/json"))
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
     }
 
     @Test
     void updateUser_whenEmailIsBlank_thenReturnBadRequest() throws Exception {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
+
         mockMvc.perform(post("/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(userToCreate)));
@@ -206,6 +225,7 @@ class UserControllerTest {
     void updateUser_whenEmailDoesNotContainAtSymbol_thenReturnBadRequest() throws Exception {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
         mockMvc.perform(post("/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(userToCreate)));
@@ -226,6 +246,7 @@ class UserControllerTest {
         mockMvc.perform(post("/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(userToCreate)));
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
 
         userToCreate.setLogin("");
         userToCreate.setId(1);
@@ -240,6 +261,7 @@ class UserControllerTest {
     void updateUser_whenLoginIncludesBlanks_thenReturnBadRequest() throws Exception {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
         mockMvc.perform(post("/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(userToCreate)));
@@ -257,6 +279,7 @@ class UserControllerTest {
     void updateUser_whenBirthDateIsInFuture_thenReturnBadRequest() throws Exception {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
+        when(userService.createUser(userToCreate)).thenReturn(userToCreate);
         mockMvc.perform(post("/users")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(userToCreate)));

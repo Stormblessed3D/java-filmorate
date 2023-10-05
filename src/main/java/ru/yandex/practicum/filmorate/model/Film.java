@@ -1,10 +1,13 @@
 package ru.yandex.practicum.filmorate.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import ru.yandex.practicum.filmorate.annotation.ReleaseDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 public class Film {
@@ -19,6 +22,8 @@ public class Film {
     private LocalDate releaseDate;
     @Positive
     private int duration;
+    @JsonIgnore
+    private Set<Integer> likes;
     public static final int MAXIMUM_DESCRIPTION_LENGTH = 200;
     public static final LocalDate INITIAL_DATE = LocalDate.of(1895, 12, 28);
 
@@ -28,6 +33,11 @@ public class Film {
         this.description = description;
         this.releaseDate = releaseDate;
         this.duration = duration;
+        likes = new HashSet<>();
+    }
+
+    public Integer getNumberOfLikes() {
+        return getLikes().size();
     }
 }
 
