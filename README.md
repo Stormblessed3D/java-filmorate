@@ -1,5 +1,5 @@
 <h1 align="center">java filmorate project</a> 
-<h3 align="center">ER diagram of filmorate project</h3>
+### ER diagram of filmorate project
 ![ER diagram of filmorate project](https://github.com/Stormblessed3D/java-filmorate/blob/add-database/ER_diagram.JPG)
 
 ### examples of major SQL queries
