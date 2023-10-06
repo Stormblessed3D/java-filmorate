@@ -17,7 +17,7 @@ GROUP BY films.film_id;
 SELECT films.film_id, films.name, films.description, films.release_date, films.duration, films.rating_mpa, COUNT(likes.user_id)
 FROM films
 LEFT OUTER JOIN likes ON films.film_id = likes.film_id
-WHERE film_id = -- film id
+WHERE film_id = -- please indicate here film id
 GROUP BY films.film_id;
 ```
 
@@ -41,7 +41,7 @@ FROM users;
 ```sql
 SELECT users.user_id, users.email, users.login, users.name, users.birthday
 FROM users
-WHERE users.user_id = -- user id;
+WHERE users.user_id = -- please indicate here user id;
 ```
 
 **getFriends**:
@@ -49,7 +49,7 @@ WHERE users.user_id = -- user id;
 SELECT friends.friend_id, users.email, users.login, users.name, users.birthday
 FROM friends
 LEFT OUTER JOIN users ON friends.friend_id = users.user_id 
-WHERE friends.user_id = -- user id;
+WHERE friends.user_id = -- please indicate here user id;
 ```
 
 **getCommonFriends**:
@@ -57,10 +57,10 @@ WHERE friends.user_id = -- user id;
 SELECT friends.friend_id, users.email, users.login, users.name, users.birthday
 FROM friends
 LEFT OUTER JOIN users ON friends.friend_id = users.user_id 
-WHERE friends.user_id = -- user id
+WHERE friends.user_id = -- please indicate here user id
 INTERSECT
 SELECT friends.friend_id, users.email, users.login, users.name, users.birthday
 FROM friends
 LEFT OUTER JOIN users ON friends.friend_id = users.user_id 
-WHERE friends.user_id = -- user id
+WHERE friends.user_id = -- please indicate here user id
 ```
