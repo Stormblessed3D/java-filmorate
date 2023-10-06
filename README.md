@@ -23,12 +23,13 @@ GROUP BY films.film_id;
 
 **getMostPopularFilms**:
 ```sql
-SELECT films.film_id, films.name, films.description, films.release_date, films.duration, films.rating_mpa, COUNT(likes.user_id) AS number_of_likes
+SELECT films.film_id, films.name, films.description, films.release_date, films.duration, films.rating_mpa
 FROM films
-LEFT OUTER JOIN likes ON films.film_id = likes.film_id
-GROUP BY films.film_id
-ORDER BY number_of_likes DESC
-LIMIT 10; -- top 10 most popular films
+WHERE films.film_id IN (SELECT likes.film_id
+                        FROM likes
+                        GROUP BY likes.film_id
+                        ORDER BY COUNT(likes.user_id) DESC
+                        LIMIT 10); -- top 10 most popular films
 ```
 
 **getAllUsers**:
