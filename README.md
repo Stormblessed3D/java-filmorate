@@ -47,10 +47,11 @@ WHERE users.user_id = -- please indicate here user id;
 
 **getFriends**:
 ```sql
-SELECT friends.friend_id, users.email, users.login, users.name, users.birthday
-FROM friends
-LEFT OUTER JOIN users ON friends.friend_id = users.user_id 
-WHERE friends.user_id = -- please indicate here user id;
+SELECT users.user_id, users.email, users.login, users.name, users.birthday
+FROM users
+WHERE users.user_id IN (SELECT friends.friend_id
+                        FROM friends
+                        WHERE friends.user_id = - please indicate here user id);
 ```
 
 **getCommonFriends**:
