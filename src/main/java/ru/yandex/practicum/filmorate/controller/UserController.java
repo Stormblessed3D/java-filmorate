@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
@@ -51,14 +51,19 @@ public class UserController {
     }
 
     @PutMapping("/{userId}/friends/{friendId}")
-    public User addUserToFriends(@PathVariable @Positive Integer userId,
+    public void addUserToFriends(@PathVariable @Positive Integer userId,
                                  @PathVariable @Positive Integer friendId) {
-        return userService.addFriend(userId,friendId);
+        userService.addFriend(userId,friendId);
     }
 
     @DeleteMapping("/{userId}/friends/{friendId}")
-    public User deleteFriend(@PathVariable @Positive Integer userId,
+    public void deleteFriend(@PathVariable @Positive Integer userId,
                              @PathVariable @Positive Integer friendId) {
-        return userService.deleteFriend(userId, friendId);
+        userService.deleteFriend(userId, friendId);
+    }
+
+    @DeleteMapping("/{userId}")
+    public void deleteFilm(@PathVariable @Positive Integer userId) {
+        userService.deleteUser(userId);
     }
 }
