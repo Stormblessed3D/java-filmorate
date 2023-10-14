@@ -1,12 +1,12 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.film.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.genre.GenreDao;
+import ru.yandex.practicum.filmorate.storage.like.LikeDao;
 import ru.yandex.practicum.filmorate.storage.user.UserStorage;
 
 import java.util.List;
@@ -16,20 +16,23 @@ import java.util.List;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserStorage userStorage;
+    private final LikeDao likeDao;
+    private final GenreDao genreDao;
 
-    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage,
-                       @Qualifier("userDbStorage") UserStorage userStorage) {
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage, LikeDao likeDao, GenreDao genreDao) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
+        this.likeDao = likeDao;
+        this.genreDao = genreDao;
     }
 
     public List<Film> getAllFilms() {
-        return filmStorage.getAllFilms();
+        return genreDao.addGenresToFilms(filmStorage.getAllFilms());
     }
 
     public Film getFilmById(Integer id) {
-        return filmStorage.getFilmById(id)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Фильм с id %d не найден", id)));
+        Film film = filmStorage.getFilmById(id);
+        return genreDao.addGenresToFilm(id, film);
     }
 
     public Film createFilm(Film film) {
@@ -40,7 +43,8 @@ public class FilmService {
     public Film updateFilm(Film film) {
         getFilmById(film.getId());
         log.info("Фильм c id {} был обновлен", film.getId());
-        return filmStorage.updateFilm(film);
+        Film updatedFilm = filmStorage.updateFilm(film);
+        return genreDao.addGenresToFilm(updatedFilm.getId(), updatedFilm);
     }
 
     public void deleteFilm(Integer filmId) {
@@ -52,21 +56,19 @@ public class FilmService {
 
     public Film addLike(Integer filmId, Integer userId) {
         Film film = getFilmById(filmId);
-        User user = userStorage.getUserById(userId)
-                        .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", userId)));
-        filmStorage.addLike(filmId, userId);
+        User user = userStorage.getUserById(userId);
+        likeDao.addLike(filmId, userId);
         return film;
     }
 
     public Film deleteLike(Integer filmId, Integer userId) {
         Film film = getFilmById(filmId);
-        User user = userStorage.getUserById(userId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("Пользователь с id %d не найден", userId)));
-        filmStorage.deleteLike(filmId, userId);
+        User user = userStorage.getUserById(userId);
+        likeDao.deleteLike(filmId, userId);
         return film;
     }
 
     public List<Film> getMostPopularFilms(Integer numberOfFilms) {
-        return filmStorage.getMostPopularFilms(numberOfFilms);
+        return genreDao.addGenresToFilms(filmStorage.getMostPopularFilms(numberOfFilms));
     }
 }

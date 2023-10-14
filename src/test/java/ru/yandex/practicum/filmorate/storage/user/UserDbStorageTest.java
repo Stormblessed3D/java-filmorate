@@ -7,12 +7,12 @@ import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabas
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import ru.yandex.practicum.filmorate.model.user.User;
+import ru.yandex.practicum.filmorate.storage.friend.FriendDao;
 
 import java.time.LocalDate;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.*;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class UserDbStorageTest {
     private final UserDbStorage userStorage;
+    private final FriendDao friendDao;
 
     @Test
     void addUser() {
@@ -27,11 +28,7 @@ class UserDbStorageTest {
                 LocalDate.of(1990, 1, 1));
         userStorage.addUser(userToCreate);
 
-        assertThat(userStorage.getUserById(1))
-                .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
-                );
+        assertThat(userStorage.getUserById(1)).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
@@ -54,11 +51,7 @@ class UserDbStorageTest {
         userToCreate.setId(1);
         userStorage.updateUser(userToCreate);
 
-        assertThat(userStorage.getUserById(1))
-                .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("name", "Fedya")
-                );
+        assertThat(userStorage.getUserById(1)).hasFieldOrPropertyWithValue("name", "Fedya");
     }
 
     @Test
@@ -75,13 +68,7 @@ class UserDbStorageTest {
         User userToCreate = new User("topUser@gmail.com", "topUser", "Alex",
                 LocalDate.of(1990, 1, 1));
         userStorage.addUser(userToCreate);
-        Optional<User> userOptional = userStorage.getUserById(1);
-
-        assertThat(userOptional)
-                .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
-                );
+        assertThat(userStorage.getUserById(1)).hasFieldOrPropertyWithValue("id", 1);
     }
 
     @Test
@@ -93,10 +80,10 @@ class UserDbStorageTest {
                 LocalDate.of(1980, 2, 15));
         userStorage.addUser(user2);
 
-        userStorage.addFriend(1,2);
+        friendDao.addFriend(1, 2);
 
-        assertEquals(1, userStorage.getUserFriends(1).size());
-        assertEquals(0, userStorage.getUserFriends(2).size());
+        assertEquals(1, friendDao.getUserFriends(1).size());
+        assertEquals(0, friendDao.getUserFriends(2).size());
     }
 
     @Test
@@ -108,11 +95,11 @@ class UserDbStorageTest {
                 LocalDate.of(1980, 2, 15));
         userStorage.addUser(user2);
 
-        userStorage.addFriend(1,2);
+        friendDao.addFriend(1, 2);
 
-        assertEquals(1, userStorage.getUserFriends(1).size());
-        assertEquals(2, userStorage.getUserFriends(1).get(0).getId());
-        assertEquals(0, userStorage.getUserFriends(2).size());
+        assertEquals(1, friendDao.getUserFriends(1).size());
+        assertEquals(2, friendDao.getUserFriends(1).get(0).getId());
+        assertEquals(0, friendDao.getUserFriends(2).size());
     }
 
     @Test
@@ -124,9 +111,9 @@ class UserDbStorageTest {
                 LocalDate.of(1980, 2, 15));
         userStorage.addUser(user2);
 
-        userStorage.addFriend(1,2);
-        userStorage.deleteFriend(1,2);
+        friendDao.addFriend(1, 2);
+        friendDao.deleteFriend(1, 2);
 
-        assertEquals(0, userStorage.getUserFriends(1).size());
+        assertEquals(0, friendDao.getUserFriends(1).size());
     }
 }
