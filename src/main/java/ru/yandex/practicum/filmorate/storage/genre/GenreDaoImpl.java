@@ -12,7 +12,6 @@ import ru.yandex.practicum.filmorate.model.film.Genre;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.SQLFeatureNotSupportedException;
 import java.util.*;
 
 @Repository
