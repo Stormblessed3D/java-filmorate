@@ -10,6 +10,7 @@ public class LikeDaoImpl implements LikeDao {
     public LikeDaoImpl(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
+
     @Override
     public void addLike(Integer filmId, Integer userId) {
         String sqlQuery = "INSERT INTO likes(film_id, user_id) VALUES (?, ?)";
