@@ -25,10 +25,10 @@ public class GenreDaoImpl implements GenreDao {
     }
 
     @Override
-    public Optional<Genre> getGenreById(Integer genreId) {
+    public Genre getGenreById(Integer genreId) {
         try {
             String sqlQuery = "SELECT genre_id, genre_name FROM genres WHERE genre_id = ?";
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, genreId));
+            return jdbcTemplate.queryForObject(sqlQuery, this::mapRowToGenre, genreId);
         } catch (EmptyResultDataAccessException e) {
             throw new EntityNotFoundException(String.format("Genre with id of %d not found", genreId));
         }
@@ -64,8 +64,6 @@ public class GenreDaoImpl implements GenreDao {
                     .id(rs.getInt("genre_id"))
                     .name(rs.getString("genre_name"))
                     .build());
-            film.setGenres(genres);
-            films.put(film.getId(), film);
         });
         return new ArrayList<>(films.values());
     }

@@ -160,11 +160,7 @@ class FilmDbStorageTest {
 
     @Test
     void getGenreById() {
-        assertThat(genreDao.getGenreById(1))
-                .isPresent()
-                .hasValueSatisfying(film ->
-                        assertThat(film).hasFieldOrPropertyWithValue("name", "Комедия")
-                );
+        assertThat(genreDao.getGenreById(1)).hasFieldOrPropertyWithValue("name", "Комедия");
     }
 
     @Test

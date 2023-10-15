@@ -8,7 +8,7 @@ import java.util.*;
 public interface GenreDao {
     List<Genre> getAllGenres();
 
-    Optional<Genre> getGenreById(Integer id);
+    Genre getGenreById(Integer id);
 
     Film  addGenresToFilm(Integer filmId, Film film);
 
