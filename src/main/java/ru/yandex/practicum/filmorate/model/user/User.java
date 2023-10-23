@@ -1,17 +1,19 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.user;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.Builder;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Data
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@Builder
 @NoArgsConstructor
 public class User {
+    @EqualsAndHashCode.Include
     private int id = 0;
     @Email
     @NotBlank
@@ -23,8 +25,14 @@ public class User {
     @NotNull
     @PastOrPresent
     private LocalDate birthday;
-    @JsonIgnore
-    private Set<Integer> friends = new HashSet<>();
+
+    public User(int id, String email, String login, String name, LocalDate birthday) {
+        this.id = id;
+        this.email = email;
+        this.login = login;
+        this.name = name;
+        this.birthday = birthday;
+    }
 
     public User(String email, String login, String name, LocalDate birthday) {
         this.email = email;

@@ -10,11 +10,14 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.exception.EntityNotFoundException;
-import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.RatingMPA;
 import ru.yandex.practicum.filmorate.service.FilmService;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.verify;
@@ -37,8 +40,15 @@ class FilmControllerTest {
 
     @Test
     void getAllFilms_thenResponseStatusOk_WithFilmsCollectionInBody() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(2020, 1, 1))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         filmToCreate.setId(1);
         List<Film> expectedFilms = List.of(filmToCreate);
         when(filmService.getAllFilms()).thenReturn(expectedFilms);
@@ -60,8 +70,15 @@ class FilmControllerTest {
 
     @Test
     void createFilm_whenInvokedWithValidFilm_thenResponseStatusOk_WithCreatedFilmInBody() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(2020, 1, 1))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         filmToCreate.setId(1);
         when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
 
@@ -100,8 +117,15 @@ class FilmControllerTest {
     @Test
     void createFilm_whenMaximumDescriptionIs200Symbols_thenResponseStatusOk() throws Exception {
         String description = "s";
-        Film filmToCreate = new Film("TestMovie", description.repeat(200),
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description(description.repeat(200))
+                .releaseDate(LocalDate.of(2020, 1, 1))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         filmToCreate.setId(1);
 
         when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
@@ -120,8 +144,15 @@ class FilmControllerTest {
     @Test
     void createFilm_whenMaximumDescriptionIsMoreThan200Symbols_thenReturnBadRequest() throws Exception {
         String description = "s";
-        Film filmToCreate = new Film("TestMovie", description.repeat(201),
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description(description.repeat(201))
+                .releaseDate(LocalDate.of(2020, 1, 1))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
 
         mockMvc.perform(post("/films")
                         .contentType("application/json")
@@ -131,8 +162,15 @@ class FilmControllerTest {
 
     @Test
     void createFilm_whenReleaseDateIs_28_12_1895_thenResponseStatusOk() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "Description",
-                LocalDate.of(1985, 12, 28), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1985, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         filmToCreate.setId(1);
         when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
 
@@ -150,8 +188,15 @@ class FilmControllerTest {
 
     @Test
     void createFilm_whenDurationIsNegative_thenReturnBadRequest() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "Description",
-                LocalDate.of(1999, 12, 27), -1);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(-1)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
 
         mockMvc.perform(post("/films")
                         .contentType("application/json")
@@ -161,16 +206,30 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenIdIsUnknown_thenReturnBadRequest() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
         mockMvc.perform(post("/films")
                 .contentType("application/json")
                 .content(objectMapper.writeValueAsString(filmToCreate)));
         filmToCreate.setId(1);
 
-        Film filmToUpdate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToUpdate = Film.builder()
+                .name("Film2")
+                .description("Film2Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         filmToUpdate.setId(2);
         when(filmService.updateFilm(filmToUpdate)).thenThrow(new EntityNotFoundException("Фильм с id 2 не найден"));
 
@@ -184,8 +243,15 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenInvokedWithValidFilm_thenResponseStatusOk_WithCreatedFilmInBody() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         when(filmService.createFilm(filmToCreate)).thenReturn(filmToCreate);
         mockMvc.perform(post("/films")
                 .contentType("application/json")
@@ -208,8 +274,15 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenRequestIsEmpty_thenReturnBadRequest() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();;
 
         mockMvc.perform(post("/films")
                 .contentType("application/json")
@@ -222,8 +295,15 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenNameIsBlank_thenReturnBadRequest() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();;
 
         mockMvc.perform(post("/films")
                 .contentType("application/json")
@@ -239,8 +319,15 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenMaximumDescriptionIs200Symbols_thenResponseStatusOk() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         when(filmService.updateFilm(filmToCreate)).thenReturn(filmToCreate);
 
         mockMvc.perform(post("/films")
@@ -265,8 +352,15 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenMaximumDescriptionIsMoreThan200Symbols_thenReturnBadRequest() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
 
         mockMvc.perform(post("/films")
                 .contentType("application/json")
@@ -284,8 +378,15 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenReleaseDateIs_28_12_1895_thenResponseStatusOk() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
         when(filmService.updateFilm(filmToCreate)).thenReturn(filmToCreate);
 
         mockMvc.perform(post("/films")
@@ -309,8 +410,15 @@ class FilmControllerTest {
 
     @Test
     void updateFilm_whenDurationIsNegative_thenReturnBadRequest() throws Exception {
-        Film filmToCreate = new Film("TestMovie", "TestDescription",
-                LocalDate.of(2020, 1, 1), 120);
+        Film filmToCreate = Film.builder()
+                .name("Film1")
+                .description("Film1Description")
+                .releaseDate(LocalDate.of(1989, 12, 28))
+                .duration(120)
+                .mpa(new RatingMPA(3, "PG-13"))
+                .genres(Set.of(new Genre(2, "Drama")))
+                .rate(6)
+                .build();
 
         mockMvc.perform(post("/films")
                 .contentType("application/json")

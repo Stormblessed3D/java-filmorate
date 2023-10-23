@@ -1,0 +1,22 @@
+package ru.yandex.practicum.filmorate.service;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.model.film.RatingMPA;
+import ru.yandex.practicum.filmorate.storage.rating.RatingDao;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class RatingService {
+    private final RatingDao ratingDao;
+
+    public RatingMPA getMpaById(Integer id) {
+        return ratingDao.getMpaNameById(id);
+    }
+
+    public List<RatingMPA> getAllMpa() {
+        return ratingDao.getAllMpa();
+    }
+}
